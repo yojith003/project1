@@ -1,0 +1,44 @@
+<?php 
+	/* DATABASE CONNECTION ================================================ */
+	$conn = new mysqli("localhost", "root", "", "new");
+
+	/* PASSWORD ENCODING =================================================== */
+	if(isset($_POST['record'])){
+		if(!empty(trim($_POST['password'])) && !empty(trim($_POST['username']))){
+			$password = $_POST['password'];
+			$username = $_POST['username'];
+
+			$enc_password = password_hash($password, PASSWORD_DEFAULT);
+
+			$conn->query("INSERT INTO administrator(id, password) VALUES('$username','$enc_password')");
+		} 
+		else {
+			$record_error = "Both fields must have values";
+		}
+	}
+
+	/* PASSWORD VALIDATION =================================================== */
+	if(isset($_POST['validate'])){
+		$username = $_POST['username'];
+		$raw_password = $_POST['password'];
+//
+		$q = $conn->query("SELECT id FROM administrator WHERE id = '$username'");
+	if ($q->fetch_assoc() == null) {
+		$validation_iderror = 'invalid id';
+	}
+	else{
+		$res = $conn->query("SELECT password FROM administrator WHERE id = '$username'");
+
+		$hashed_password = $res->fetch_assoc()['password'];
+		#echo $hashed_password;
+		if(!password_verify($raw_password, $hashed_password)){
+			$validation_error = "Wrong password";
+		}else{
+			$validation_success = "Your password is valid";
+			header("Location: fileupload.php");
+		}
+	}
+//
+		
+
+	}
